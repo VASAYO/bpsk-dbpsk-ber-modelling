@@ -33,8 +33,15 @@ function Params = CalcAndCheckParams(inParams, LogLanguage)
         end
     end
     
-% ≈сли установлен вид модул€ции DBPSK, нужно принудительно установить
+% ≈сли установлен вид модул€ции 'DBPSK', нужно принудительно установить
 % пор€док модул€ции равный двум
     if strcmp(Params.Mapper.Type, 'DBPSK')
         Params.Mapper.ModulationOrder = 2;
+    end
+
+% ѕроверка, поступают ли на вход декодера м€гкие решени€
+    if strcmp(Params.Mapper.DecisionMethod, 'bit')
+        Params.Encoder.isSoftInput = false;
+    else
+        Params.Encoder.isSoftInput = true;
     end

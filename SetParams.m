@@ -62,6 +62,29 @@ function Encoder = SetParamsEncoder(inEncoder, ParamsNumber, ...
             % Проверка корректности введённых значений
         end
 
+    % Вид используемого кодирования:
+    % 'Convolutional, [171 133]'
+        if ~isfield(Encoder, 'Type')
+            Encoder.Type = 'Convolutional, [171 133]';
+
+        else
+            % Проверка корректности введённых значений
+            if ~(strcmp(Encoder.Type, 'Convolutional, [171 133]'))
+                if strcmp(LogLanguage, 'Russian')
+                    error('Недопустимое значение Encoder.Type');
+                else
+                    error('Invalid value Encoder.Type');
+                end
+            end
+        end
+
+    % Память алгоритма Витерби
+        if ~isfield(Encoder, 'TBDepth')
+            Encoder.TBDepth = 30;
+        else
+            % Проверка корректности введённых значений
+        end
+
     % Следующие переменные вычисляются в CalcAndCheckParams():
         % isSoftInput;
 end

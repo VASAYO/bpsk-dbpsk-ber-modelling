@@ -33,10 +33,7 @@ classdef ClassChannel < handle
             % Определим среднюю мощность информационного бита (энергия,
             % приходящаяся на информационный бит, оказывается больше, так
             % как используются проверочные биты)
-                obj.Pbd = obj.Pb;
-                % Когда и если будет реализован класс кодирования, то здесь
-                % должно будет быть
-                % obj.Pbd = obj.Pb / Objs.Encoder.Rate;
+                obj.Pbd = obj.Pb / Objs.Encoder.Rate;
         end
         function [OutData, InstChannelParams] = Step(obj, InData, h2dB)
             if obj.isTransparent

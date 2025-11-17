@@ -167,6 +167,6 @@ function Objs = LoopFun(inObjs, Ruler, WorkerNum)
                         Frame.RxEncData);
 
             % Накопление статистики по текущему Frame
-                Objs.Stat.Step(Frame);
+                Objs.Stat.Step(Frame, Objs);
         end
 end
