@@ -91,12 +91,14 @@ function Mapper = SetParamsMapper(inMapper, ParamsNumber, ...
             % Проверка корректности введённых значений
         end
 
-    % Тип сигнального созвездия: QAM | PSK
+    % Тип сигнального созвездия: PSK | DBPSK
         if ~isfield(Mapper, 'Type')
-            Mapper.Type = 'QAM';
+            Mapper.Type = 'PSK';
+            
         else
-            if ~(strcmp(Mapper.Type, 'QAM') || ...
-                    strcmp(Mapper.Type, 'PSK'))
+            if ~(strcmp(Mapper.Type, 'PSK') || ...
+                    strcmp(Mapper.Type, 'DBPSK'))
+
                 if strcmp(LogLanguage, 'Russian')
                     error('Недопустимое значение Mapper.Type');
                 else
@@ -107,7 +109,7 @@ function Mapper = SetParamsMapper(inMapper, ParamsNumber, ...
     
     % Размер сигнального созвездия
         if ~isfield(Mapper, 'ModulationOrder')
-            Mapper.ModulationOrder = 4;
+            Mapper.ModulationOrder = 2;
         else
             % Проверка корректности введённых значений
         end
@@ -119,12 +121,12 @@ function Mapper = SetParamsMapper(inMapper, ParamsNumber, ...
             % Проверка корректности введённых значений
         end
         
-    % Тип отображения бит на точки сигнального созвездия: Binary | Gray
+    % Тип отображения бит на точки сигнального созвездия: 'bin' | 'gray'
         if ~isfield(Mapper, 'SymbolMapping')
-            Mapper.SymbolMapping = 'Gray';
+            Mapper.SymbolMapping = 'gray';
         else
-            if ~(strcmp(Mapper.SymbolMapping, 'Binary') || ...
-                    strcmp(Mapper.SymbolMapping, 'Gray'))
+            if ~(strcmp(Mapper.SymbolMapping, 'bin') || ...
+                    strcmp(Mapper.SymbolMapping, 'gray'))
                 if strcmp(LogLanguage, 'Russian')
                     error('Недопустимое значение Mapper.SymbolMapping');
                 else
@@ -133,16 +135,16 @@ function Mapper = SetParamsMapper(inMapper, ParamsNumber, ...
             end
         end
 
-    % Вариант принятия решений о модуляционных символах:  Hard decision |
-    % Log-likelihood ratio | Approximate log-likelihood ratio
+    % Вариант принятия решений о модуляционных символах:
+    % bit | llr | approxllr
         if ~isfield(Mapper, 'DecisionMethod')
-            Mapper.DecisionMethod = 'Approximate log-likelihood ratio';
+            Mapper.DecisionMethod = 'bit';
         else
-            if ~(strcmp(Mapper.DecisionMethod, 'Hard decision') || ...
-                    strcmp(Mapper.DecisionMethod, ...
-                    'Log-likelihood ratio') || ...
-                    strcmp(Mapper.DecisionMethod, ...
-                    'Approximate log-likelihood ratio'))
+            if ~(strcmp(Mapper.DecisionMethod, 'bit') || ...
+                    strcmp(Mapper.DecisionMethod, 'llr') || ...
+                    strcmp(Mapper.DecisionMethod, 'approxllr'))
+
+                % Вывод ошибки
                 if strcmp(LogLanguage, 'Russian')
                     error('Недопустимое значение Mapper.DecisionMethod');
                 else

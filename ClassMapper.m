@@ -8,10 +8,11 @@ classdef ClassMapper < handle
             ModulationOrder;
         % Ротация сигнального созвездия
             PhaseOffset;
-        % Тип отображения бит на точки сигнального созвездия: Binary | Gray
+        % Тип отображения бит на точки сигнального созвездия: 
+        % bin | gray
             SymbolMapping;
-        % Вариант принятия решений о модуляционных символах: Hard decision
-        % | Log-likelihood ratio | Approximate log-likelihood ratio
+        % Вариант принятия решений о модуляционных символах: 
+        % bit | llr | approxllr
             DecisionMethod;
         % Переменная управления языком вывода информации для пользователя
             LogLanguage;
@@ -23,9 +24,9 @@ classdef ClassMapper < handle
             Bits;
         % Часто используемое значение
             log2M;
-        % Объекты для модуляции/демодуляции
-            Mapper;
-            DeMapper;
+        % Указатели на функции модуляции/демодуляции
+            MapperFun;
+            DeMapperFun;
     end
     methods
         function obj = ClassMapper(Params, LogLanguage) % Конструктор
@@ -44,35 +45,33 @@ classdef ClassMapper < handle
             % Расчёт часто используемого значения
                 obj.log2M = log2(Mapper.ModulationOrder);
             
-            % Инициализация объектов-модуляторов
-                if strcmp(Mapper.Type, 'QAM')
-                    obj.Mapper = comm.RectangularQAMModulator( ...
-                        'ModulationOrder', Mapper.ModulationOrder, ...
-                        'PhaseOffset', Mapper.PhaseOffset, ...
-                        'BitInput', true, ...
-                        'SymbolMapping', Mapper.SymbolMapping ...
-                    );
-                    obj.DeMapper = comm.RectangularQAMDemodulator( ...
-                        'ModulationOrder', Mapper.ModulationOrder, ...
-                        'PhaseOffset', Mapper.PhaseOffset, ...
-                        'BitOutput', true, ...
-                        'SymbolMapping', Mapper.SymbolMapping, ...
-                        'DecisionMethod', Mapper.DecisionMethod ...
-                    );
-                elseif strcmp(Mapper.Type, 'PSK')
-                    obj.Mapper = comm.PSKModulator( ...
-                        'ModulationOrder', Mapper.ModulationOrder, ...
-                        'PhaseOffset', Mapper.PhaseOffset, ...
-                        'BitInput', true, ...
-                        'SymbolMapping', Mapper.SymbolMapping ...
-                    );
-                    obj.DeMapper = comm.PSKDemodulator( ...
-                        'ModulationOrder', Mapper.ModulationOrder, ...
-                        'PhaseOffset', Mapper.PhaseOffset, ...
-                        'BitOutput', true, ...
-                        'SymbolMapping', Mapper.SymbolMapping, ...
-                        'DecisionMethod', Mapper.DecisionMethod ...
-                    );
+            % Инициализация указателей на функции модуляции/демодуляции
+                if strcmp(Mapper.Type, 'PSK')
+                    % Маппер
+                        obj.MapperFun = @(x) pskmod(x, ...
+                            obj.ModulationOrder, obj.PhaseOffset, ...
+                            obj.SymbolMapping, ...
+                            "InputType", "bit", ...
+                            "OutputDataType", "double");
+
+                    % Демаппер
+                        obj.DeMapperFun = @(y, nvar) pskdemod(y, ...
+                            obj.ModulationOrder, obj.PhaseOffset, ...
+                            obj.SymbolMapping, ...
+                            "OutputType", obj.DecisionMethod, ...
+                            "NoiseVariance", nvar, ...
+                            "OutputDataType", "double");
+
+                elseif strcmp(Mapper.Type, 'DBPSK')
+                    % Маппер
+                        obj.MapperFun = @(x) dpskmod(x, ...
+                            obj.ModulationOrder, ...
+                            obj.PhaseOffset, ...
+                            obj.SymbolMapping);
+
+                    % Демаппер
+                        obj.DeMapperFun = ...
+                            @(x, nvar)obj.DBPSKDemod(x, nvar);
                 end
 
             % Определим массив возможных бит на входе модулятора и
@@ -83,27 +82,51 @@ classdef ClassMapper < handle
                 else
                     obj.Bits = de2bi(0:obj.ModulationOrder-1, ...
                         obj.log2M, 'left-msb').';
-                    obj.Constellation = obj.Mapper.step(obj.Bits(:));
+                    obj.Constellation = obj.MapperFun(obj.Bits(:));
                 end
         end
+
         function OutData = StepTx(obj, InData)
+        % Маппинг
+
             if obj.isTransparent
                 OutData = InData;
                 return
             end
             
-            OutData = obj.Mapper.step(InData);
+            OutData = obj.MapperFun(InData);
         end
+
         function OutData = StepRx(obj, InData, InstChannelParams)
+        % Демаппинг
+
             if obj.isTransparent
                 OutData = InData;
                 return
             end
             
-            if ~(strcmp(obj.DecisionMethod, 'Hard decision'))
-                set(obj.DeMapper, 'Variance', InstChannelParams.Variance);
+            OutData = obj.DeMapperFun(InData, InstChannelParams.Variance);
+        end
+    end
+
+    methods (Access = private) % Методы для использования внутри объекта
+        function OutData = DBPSKDemod(obj, InData, nvar)
+        % Функция DBPSK демодулятора
+
+            if strcmp(obj.DecisionMethod, 'bit')
+                % Вынесение жестких решений
+                    OutData = dpskdemod(InData, ...
+                        obj.ModulationOrder, ...
+                        obj.PhaseOffset, ...
+                        obj.SymbolMapping);
+
+            elseif strcmp(obj.DecisionMethod, 'llr') || ...
+                    strcmp(obj.DecisionMethod, 'approxllr')
+
+                % Тут должен находится алгоритм вынесения мягких решений
+                    error(['Вынесение мягких решений для DBPSK пока ' ...
+                        'не предусмотрено моделью']);
             end
-            OutData = obj.DeMapper.step(InData);
         end
     end
 end

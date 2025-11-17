@@ -13,7 +13,7 @@ function Params = CalcAndCheckParams(inParams, LogLanguage)
 % принудительно установить режим вынесения жёстких решений, иначе не
 % удастся выполнить сравнение полученной и переданной информации
     if Params.Encoder.isTransparent
-        Params.Mapper.DecisionMethod = 'Hard decision';
+        Params.Mapper.DecisionMethod = 'bit';
     end
     
 % Проверка того, что в модулятор поступает число бит, делящееся на log2(M)
@@ -33,3 +33,8 @@ function Params = CalcAndCheckParams(inParams, LogLanguage)
         end
     end
     
+% Если установлен вид модуляции DBPSK, нужно принудительно установить
+% порядок модуляции равный двум
+    if strcmp(Params.Mapper.Type, 'DBPSK')
+        Params.Mapper.ModulationOrder = 2;
+    end
