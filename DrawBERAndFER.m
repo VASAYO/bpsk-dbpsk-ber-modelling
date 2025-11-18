@@ -83,12 +83,7 @@ function DrawBERAndFER(DirName)
                     h2dB = 0:0.1:10.5;
                     BER = berawgn(h2dB, 'qam', 4);
                     plot(h2dB, BER);
-                    AddNames{end+1} = 'QPSK'; %#ok<AGROW>
-
-                    h2dB = 0:0.1:14.4;
-                    BER = berawgn(h2dB, 'qam', 16);
-                    plot(h2dB, BER);
-                    AddNames{end+1} = '16-QAM'; %#ok<AGROW>
+                    AddNames{end+1} = 'th-QPSK'; %#ok<AGROW>
                 end
 
             % Добавим легенду
