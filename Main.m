@@ -17,9 +17,8 @@ function Main(FirstParamsNum, Step4ParamsNum, LogLanguage)
 %   LogLanguage - €зык дл€ вывода сообщений пользователю и сохранени€ лога
 %       ('Russian' (по умолчанию) | 'English').
 
-    % ќчистка command window, закрытие всего
+    % ќчистка command window
         clc;
-        close all;
 
     % ѕроверим количество входных переменных
         if ~(nargin >= 0 && nargin <= 3)
