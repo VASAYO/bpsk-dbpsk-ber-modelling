@@ -37,7 +37,10 @@ classdef ClassEncoder < handle
                 obj.LogLanguage = LogLanguage;
 
             % Скорость кодирования и описание свёрточного кодера
-                if strcmp(obj.Type, 'Convolutional, [171 133]')
+                if obj.isTransparent
+                    obj.Rate = 1;
+
+                elseif strcmp(obj.Type, 'Convolutional, [171 133]')
                     obj.Rate = 1/2;
                     obj.Trellis = poly2trellis(7, [171 133]);
                 end
