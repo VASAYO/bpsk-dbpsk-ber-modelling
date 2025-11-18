@@ -9,11 +9,21 @@ function Params = CalcAndCheckParams(inParams, LogLanguage)
 % Пересохраним входные данные
     Params = inParams;
     
-% Если в модели отключено декодирование, то в демодуляторе нужно
-% принудительно установить режим вынесения жёстких решений, иначе не
-% удастся выполнить сравнение полученной и переданной информации
+% Если в модели отключено декодирование, то нужно: 
+%   - принудительно установить в демодуляторе режим вынесения жёстких 
+%     решений, иначе не удастся выполнить сравнение полученной и переданной 
+%     информации;
+%   - Установить задержку декодирования равной нулю
     if Params.Encoder.isTransparent
         Params.Mapper.DecisionMethod = 'bit';
+        Params.Encoder.TBDepth = 0;
+    end
+
+% Проверка, поступают ли на вход декодера мягкие решения
+    if strcmp(Params.Mapper.DecisionMethod, 'bit')
+        Params.Encoder.isSoftInput = false;
+    else
+        Params.Encoder.isSoftInput = true;
     end
     
 % Проверка того, что в модулятор поступает число бит, делящееся на log2(M)
@@ -37,11 +47,4 @@ function Params = CalcAndCheckParams(inParams, LogLanguage)
 % порядок модуляции равный двум
     if strcmp(Params.Mapper.Type, 'DBPSK')
         Params.Mapper.ModulationOrder = 2;
-    end
-
-% Проверка, поступают ли на вход декодера мягкие решения
-    if strcmp(Params.Mapper.DecisionMethod, 'bit')
-        Params.Encoder.isSoftInput = false;
-    else
-        Params.Encoder.isSoftInput = true;
     end

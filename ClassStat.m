@@ -7,9 +7,12 @@ classdef ClassStat < handle
             NumErFrames; % количество ошибочных  кадров
         % Переменная управления языком вывода информации для пользователя
             LogLanguage;
+
+        % Объект подсчета ошибок
+            errCalc;
     end
     methods
-        function obj = ClassStat(LogLanguage) % Конструктор
+        function obj = ClassStat(LogLanguage, Objs) % Конструктор
             % Инициализация значений переменных статистики
                 obj.NumTrBits   = 0;
                 obj.NumTrFrames = 0;
@@ -17,44 +20,38 @@ classdef ClassStat < handle
                 obj.NumErFrames = 0;
             % Переменная LogLanguage
                 obj.LogLanguage = LogLanguage;
+
+            % Объект подсчета ошибок
+                obj.errCalc = comm.ErrorRate( ...
+                    "ReceiveDelay", Objs.Encoder.TBDepth);
         end
 
-        function Step(obj, Frame, Objs)
-            
-                if ~Objs.Encoder.isTransparent
-                % Для случая с использованием свёрточного кодирования
+        function Step(obj, Frame)
 
-                    % Объект подсчёта ошибок
-                        errorCalc = comm.ErrorRate( ...
-                            ReceiveDelay=Objs.Encoder.TBDepth);
+            % Подсчёт ошибок и обновление переменных
+                Buf = obj.errCalc(Frame.TxData, Frame.RxData);
 
-                    % Подсчёт ошибок
-                        Buf = errorCalc(Frame.TxData, Frame.RxData);
+                obj.NumTrBits   = Buf(3);
+                obj.NumTrFrames = obj.NumTrFrames + 1;
+                obj.NumErBits   = Buf(2);
+                % Неправильно
+                obj.NumErFrames = obj.NumErFrames + sign(Buf(2));
 
-                    % Обновление статистики
-                        obj.NumTrBits   = obj.NumTrBits   + ...
-                            Buf(3);
-                        obj.NumTrFrames = obj.NumTrFrames + 1;
-                        obj.NumErBits   = obj.NumErBits   + Buf(2);
-                        obj.NumErFrames = obj.NumErFrames + sign(Buf(2));
-
-                else
-                % Случай без кодирования
-
-                    % Обновление статистики
-                        obj.NumTrBits   = obj.NumTrBits   + ...
-                            length(Frame.TxData);
-                        obj.NumTrFrames = obj.NumTrFrames + 1;
-                        Buf = sum(Frame.TxData ~= Frame.RxData);
-                        obj.NumErBits   = obj.NumErBits   + Buf;
-                        obj.NumErFrames = obj.NumErFrames + sign(Buf);
-                end
+                % % Обновление статистики (исходный вариант подсчёта ошибок)
+                %     obj.NumTrBits   = obj.NumTrBits   + ...
+                %         length(Frame.TxData);
+                %     obj.NumTrFrames = obj.NumTrFrames + 1;
+                %     Buf = sum(Frame.TxData ~= Frame.RxData);
+                %     obj.NumErBits   = obj.NumErBits   + Buf;
+                %     obj.NumErFrames = obj.NumErFrames + sign(Buf);
         end
         function Reset(obj)
             obj.NumTrBits   = 0;
             obj.NumTrFrames = 0;
             obj.NumErBits   = 0;
             obj.NumErFrames = 0;
+
+            obj.errCalc.reset();
         end            
     end
 end

@@ -28,7 +28,7 @@
     Encoder.isTransparent = false;
     Mapper.isTransparent = false;
     Channel.isTransparent = false;
-    
+
     Mapper.Type = 'PSK';
     Mapper.ModulationOrder = 2;
     Mapper.DecisionMethod = 'bit';
@@ -44,21 +44,24 @@
     Mapper.isTransparent = false;
     Channel.isTransparent = false;
 
+    Source.NumBitsPerFrame = 1e4;
+
     Mapper.Type = 'PSK';
     Mapper.ModulationOrder = 2;
     Mapper.DecisionMethod = 'llr';
 
     BER.h2dBInit = 0;
-    BER.MinNumErBits = 500;
 
     Common.NumWorkers = 8;
     Common.SaveFileName = sprintf('BPSK-ConvEnc-soft');
+
+    BER.MinBER = 10^-5;
 % End of Params (ФМ-2, кодирование, мягкие решения)
 
     Encoder.isTransparent = false;
     Mapper.isTransparent = false;
     Channel.isTransparent = false;
-    
+
     Mapper.Type = 'DBPSK';
     Mapper.ModulationOrder = 2;
     Mapper.DecisionMethod = 'bit';

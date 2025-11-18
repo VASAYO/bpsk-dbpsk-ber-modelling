@@ -32,7 +32,6 @@ classdef ClassEncoder < handle
                 obj.Type          = Encoder.Type;
                 obj.isSoftInput   = Encoder.isSoftInput;
                 obj.TBDepth       = Encoder.TBDepth;
-
             % Переменная LogLanguage
                 obj.LogLanguage = LogLanguage;
 
@@ -42,13 +41,13 @@ classdef ClassEncoder < handle
 
                 elseif strcmp(obj.Type, 'Convolutional, [171 133]')
                     obj.Rate = 1/2;
-                    obj.Trellis = poly2trellis(7, [171 133]);
                 end
+                obj.Trellis = poly2trellis(7, [171 133]);
 
             % Свёрточный кодер [171 133]
                 obj.Coder = comm.ConvolutionalEncoder(obj.Trellis);
 
-            % Указатель на функцию декодера Витерби
+            % Конфигурация декодера
                 if ~obj.isSoftInput
                     decType = 'Hard';
                 else
@@ -61,27 +60,32 @@ classdef ClassEncoder < handle
                     TracebackDepth=obj.TBDepth);
         end
 
+
         function OutData = StepTx(obj, InData)
-            if obj.isTransparent
-                OutData = InData;
-                return
-            end
+        % Процедура кодирования
+            % Проверка прозрачности блока
+                if obj.isTransparent
+                    OutData = InData;
+                    return
+                end
             
-            % Здесь должна быть процедура кодирования
+            % Кодирование
                 if strcmp(obj.Type, 'Convolutional, [171 133]')
                     OutData = obj.Coder(InData);
                 end
         end
 
-        function OutData = StepRx(obj, InData)
-            if obj.isTransparent
-                OutData = InData;
-                return
-            end
-            
-            % Здесь должна быть процедура декодирования
-                if strcmp(obj.Type, 'Convolutional, [171 133]')
 
+        function OutData = StepRx(obj, InData)
+        % Процедура декодирования
+            % Проверка прозрачности блока
+                if obj.isTransparent
+                    OutData = InData;
+                    return
+                end
+            
+            % Декодирование
+                if strcmp(obj.Type, 'Convolutional, [171 133]')
                     OutData = obj.DeCoder(InData);
                 end
         end
