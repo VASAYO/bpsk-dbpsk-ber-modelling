@@ -1,22 +1,29 @@
-    Mapper.Type = 'PSK';
+% Сетап лист, содержащий наборы параметров для основных вариантов
+% вычислений
+
     Mapper.isTransparent = false;
     Channel.isTransparent = false;
+
+    Mapper.Type = 'PSK';
     Mapper.ModulationOrder = 2;
 
-    Common.NumWorkers = 8;
-
     BER.h2dBInit = 0;
-% End of Params
 
-    Mapper.Type = 'DBPSK';
+    Common.NumWorkers = 8;
+    Common.SaveFileName = sprintf('BPSK');
+% End of Params (ФМ-2)
+
     Mapper.isTransparent = false;
     Channel.isTransparent = false;
+
+    Mapper.Type = 'DBPSK';
     Mapper.DecisionMethod = 'bit';
 
-    Common.NumWorkers = 8;
-
     BER.h2dBInit = 0;
-% End of Params
+
+    Common.NumWorkers = 8;
+    Common.SaveFileName = sprintf('DBPSK');
+% End of Params (ДФМ-2)
 
     Encoder.isTransparent = false;
     Mapper.isTransparent = false;
@@ -30,8 +37,7 @@
     BER.MinNumErBits = 500;
 
     Common.NumWorkers = 8;
-    Common.SaveFileName = sprintf('PSK-ConvEnc-hard');
-
+    Common.SaveFileName = sprintf('BPSK-ConvEnc-hard');
 % End of Params (ФМ-2, кодирование, жесткие решения)
 
     Encoder.isTransparent = false;
@@ -46,5 +52,20 @@
     BER.MinNumErBits = 500;
 
     Common.NumWorkers = 8;
-    Common.SaveFileName = sprintf('PSK-ConvEnc-soft');
+    Common.SaveFileName = sprintf('BPSK-ConvEnc-soft');
 % End of Params (ФМ-2, кодирование, мягкие решения)
+
+    Encoder.isTransparent = false;
+    Mapper.isTransparent = false;
+    Channel.isTransparent = false;
+    
+    Mapper.Type = 'DBPSK';
+    Mapper.ModulationOrder = 2;
+    Mapper.DecisionMethod = 'bit';
+
+    BER.h2dBInit = 0;
+    BER.MinNumErBits = 500;
+
+    Common.NumWorkers = 8;
+    Common.SaveFileName = sprintf('DBPSK-ConvEnc-hard');
+% End of Params (ДФМ-2, кодирование, жесткие решения)
