@@ -78,13 +78,6 @@ function Encoder = SetParamsEncoder(inEncoder, ParamsNumber, ...
             end
         end
 
-    % Память алгоритма Витерби
-        if ~isfield(Encoder, 'TBDepth')
-            Encoder.TBDepth = 30;
-        else
-            % Проверка корректности введённых значений
-        end
-
     % Следующие переменные вычисляются в CalcAndCheckParams():
         % isSoftInput;
 end

@@ -6,8 +6,6 @@ classdef ClassEncoder < handle
             Type;
         % Поступают ли на вход декодера мягкие решения
             isSoftInput;
-        % Память алгоритма Витерби
-            TBDepth;
 
         % Переменная управления языком вывода информации для пользователя
             LogLanguage;
@@ -15,8 +13,8 @@ classdef ClassEncoder < handle
     properties (SetAccess = private) % Вычисляемые переменные
         % Скорость кодирования
             Rate;
-        % Структура, описывающая свёрточный кодер
-            Trellis;
+        % Длина кодового ограничения свёрточного кодера
+            ConstraintLength;
         % Сверточный кодер
             Coder;
         % Декодер Витерби
@@ -31,33 +29,37 @@ classdef ClassEncoder < handle
                 obj.isTransparent = Encoder.isTransparent;
                 obj.Type          = Encoder.Type;
                 obj.isSoftInput   = Encoder.isSoftInput;
-                obj.TBDepth       = Encoder.TBDepth;
             % Переменная LogLanguage
                 obj.LogLanguage = LogLanguage;
 
-            % Скорость кодирования и описание свёрточного кодера
+            % Инициализация остальных параметров на основании прозрачности
+            % блока и используемого кодирования
                 if obj.isTransparent
-                    obj.Rate = 1;
+                    obj.Rate             = 1;
+                    obj.ConstraintLength = [];
+                    obj.Coder            = [];
+                    obj.DeCoder          = [];
 
                 elseif strcmp(obj.Type, 'Convolutional, [171 133]')
                     obj.Rate = 1/2;
+                    obj.ConstraintLength = 7;
+
+                    % Описание свёрточного кодера
+                        Trellis = poly2trellis( ...
+                            obj.ConstraintLength, [171 133]);
+                    % Память алгоритма Витерби
+                        TBDepth = 30;
+
+                    obj.Coder   = @(x) convenc(x, Trellis);
+                    if obj.isSoftInput % На вход декодера поступают ЛОПы
+                        obj.DeCoder = @(x) vitdec(x, ...
+                            Trellis, TBDepth, "term", "unquant");
+
+                    else % На вход декодера поступают жёсткие решения
+                        obj.DeCoder = @(x) vitdec(x, ...
+                            Trellis, TBDepth, "term", "hard");
+                    end
                 end
-                obj.Trellis = poly2trellis(7, [171 133]);
-
-            % Свёрточный кодер [171 133]
-                obj.Coder = comm.ConvolutionalEncoder(obj.Trellis);
-
-            % Конфигурация декодера
-                if ~obj.isSoftInput
-                    decType = 'Hard';
-                else
-                    decType = "Unquantized";
-                end
-
-                obj.DeCoder = comm.ViterbiDecoder( ...
-                    obj.Trellis, ...
-                    InputFormat=decType, ...
-                    TracebackDepth=obj.TBDepth);
         end
 
 
@@ -69,10 +71,12 @@ classdef ClassEncoder < handle
                     return
                 end
             
-            % Кодирование
-                if strcmp(obj.Type, 'Convolutional, [171 133]')
-                    OutData = obj.Coder(InData);
-                end
+            if strcmp(obj.Type, 'Convolutional, [171 133]')
+                % Добавление терминационных бит
+                    DataAdd = [InData; zeros(obj.ConstraintLength, 1)];
+                % Кодирование
+                    OutData = obj.Coder(DataAdd);
+            end
         end
 
 
@@ -84,10 +88,12 @@ classdef ClassEncoder < handle
                     return
                 end
             
-            % Декодирование
-                if strcmp(obj.Type, 'Convolutional, [171 133]')
-                    OutData = obj.DeCoder(InData);
-                end
+            if strcmp(obj.Type, 'Convolutional, [171 133]')
+                % Декодирование
+                    DecodedData = obj.DeCoder(InData);
+                % Удаление терминационных бит
+                    OutData = DecodedData(1:end-obj.ConstraintLength);
+            end
         end
     end
 end

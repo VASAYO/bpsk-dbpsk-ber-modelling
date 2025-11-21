@@ -130,10 +130,6 @@ function Objs = LoopFun(inObjs, Ruler, WorkerNum)
     % distcomp/objects-and-handles-in-parfor-loops.html)
         Objs = inObjs;
 
-    % Сброс объектов кодера и декодера перед началом
-        Objs.Encoder.Coder.reset();
-        Objs.Encoder.DeCoder.reset();
-
     % Цикл по количеству кадров
         for k = 1:Ruler.OneWorkerNumOneIterFrames(WorkerNum)
             % Передатчик
