@@ -71,7 +71,7 @@ classdef ClassMapper < handle
 
                     % Демаппер
                         obj.DeMapperFun = ...
-                            @(x, nvar)obj.DBPSKDemod(x, nvar);
+                            @obj.DBPSKDemod;
                 end
 
             % Определим массив возможных бит на входе модулятора и

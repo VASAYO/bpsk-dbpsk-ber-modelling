@@ -29,12 +29,15 @@
     Mapper.isTransparent = false;
     Channel.isTransparent = false;
 
+    Source.NumBitsPerFrame = 1e4;
+    
     Mapper.Type = 'PSK';
     Mapper.ModulationOrder = 2;
     Mapper.DecisionMethod = 'bit';
 
     BER.h2dBInit = 0;
-    BER.MinNumErBits = 500;
+    BER.MinBER = 1e-5;
+    BER.MaxNumTrBits = 2e8;
 
     Common.NumWorkers = 8;
     Common.SaveFileName = sprintf('BPSK-ConvEnc-hard');
@@ -51,19 +54,18 @@
     Mapper.DecisionMethod = 'llr';
 
     BER.h2dBInit = 0;
+    BER.MinNumErBits = 5000;
+    BER.MinBER = 1e-5;
 
     Common.NumWorkers = 8;
     Common.SaveFileName = sprintf('BPSK-ConvEnc-soft');
-
-    BER.MinBER = 10^-5;
 % End of Params (ФМ-2, кодирование, мягкие решения)
 
     Encoder.isTransparent = false;
-    Mapper.isTransparent = false;
+    Mapper.isTransparent  = false;
     Channel.isTransparent = false;
 
     Mapper.Type = 'DBPSK';
-    Mapper.ModulationOrder = 2;
     Mapper.DecisionMethod = 'bit';
 
     BER.h2dBInit = 0;
